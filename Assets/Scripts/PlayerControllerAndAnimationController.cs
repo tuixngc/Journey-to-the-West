@@ -11,6 +11,7 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
     PlayerInput playerInput;
     CharacterController characterController;
     float RotationPerFrame = 15.0f;
+    float RunMultiplier = 3.0f;
     
     bool isWalking;
     bool isRunning;
@@ -86,8 +87,10 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         characterController.Move(currentMovement * Time.deltaTime);
         if(isRunning)
         {
-            characterController.Move(currentMovement * Time.deltaTime * 3);
+            characterController.Move(currentMovement * Time.deltaTime * RunMultiplier);
         }
+
+        handleGravity();
     }
 
     void handleRotation()
@@ -106,6 +109,20 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(currentRotation,TargetRotation,RotationPerFrame * Time.deltaTime);
         }
 
+    }
+
+    void handleGravity()
+    {
+        if(characterController.isGrounded)
+        {
+            float groundedGravity = -0.05f;
+            currentMovement.y = groundedGravity;
+        }
+        else
+        {
+            float ungroundedGravity = -9.8f;
+            currentMovement.y += ungroundedGravity;
+        }
     }
 
     // Update is called once per frame
