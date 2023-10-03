@@ -21,6 +21,7 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
 
     bool isWalkingPressed;
     bool isRunningPressed;
+    bool isJumpPressed;
 
     Vector2 currentMovementInput;
     Vector3 currentMovement;
@@ -39,7 +40,13 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         playerInput.CharacterControls.Movement.canceled += OnMovementInput;
         playerInput.CharacterControls.Run.started += OnRunInput;
         playerInput.CharacterControls.Run.canceled += OnRunInput;
-    
+        playerInput.CharacterControls.Jump.started += OnJumpInput;
+        playerInput.CharacterControls.Jump.canceled += OnJumpInput;
+    }
+
+    void OnJumpInput(InputAction.CallbackContext context)
+    {
+        
     }
     
     void OnMovementInput(InputAction.CallbackContext context)

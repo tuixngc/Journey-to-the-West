@@ -364,6 +364,7 @@
 -analyzer:"/Applications/Unity/Hub/Editor/2022.3.10f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 "Assets/Scripts/AnimationController.cs"
 "Assets/Scripts/CameraController.cs"
+"Assets/Scripts/JumpTest.cs"
 "Assets/Scripts/PlayerControllerAndAnimationController.cs"
 "Assets/Scripts/PlayerInput.cs"
 -langversion:9.0
