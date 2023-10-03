@@ -6,7 +6,7 @@ public class JumpTest : MonoBehaviour
 {
     [SerializeField] float initialVolocity = 0.0f;
     float currentVerticalVolocity;
-    float gravity = -9.8f;
+    [SerializeField] float gravity = -9.8f;
     Vector3 currentPosition;
     bool isJumping = false;
     float jumpTime = 0.0f;
@@ -14,16 +14,21 @@ public class JumpTest : MonoBehaviour
     bool isGround = true;
     Vector3 newPos;
 
+    void Awake ()
+    {
+	// 0 for no sync, 1 for panel refresh rate, 2 for 1/2 panel rate
+	QualitySettings.vSyncCount = 1;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        currentVerticalVolocity = initialVolocity;
     }
     
     bool isGrounded()
     {
-        isGround = Physics.Raycast(transform.position, -Vector3.up, 0.55f);
-        return isGround;
+        return transform.position.y <= 0.55;
     }
 
     // Update is called once per frame
@@ -31,26 +36,25 @@ public class JumpTest : MonoBehaviour
     {
         currentPosition = transform.position;
         
-         if(Input.GetKey("space") && !isJumping && isGround)
+        if(Input.GetKey("space") && !isJumping && isGround)
             isJumping = true;
         
-        Debug.Log("isGrounded : " + isGround.ToString());
-        Debug.Log("isJumping : " + isJumping.ToString());
-
+        //Debug.Log("isGrounded : " + isGround.ToString());
+        //Debug.Log("isJumping : " + isJumping.ToString());
         if(isJumping)
         {
-            jumpTime += Time.deltaTime;
-            currentVerticalVolocity = initialVolocity + gravity * jumpTime;
             //transform.position.Set(currentPosition.x,(currentPosition.y + currentVerticalVolocity * jumpTime),currentPosition.z);
             newPos = new Vector3(currentPosition.x,(currentPosition.y + currentVerticalVolocity * Time.deltaTime),currentPosition.z);
             transform.position = newPos;
+            currentVerticalVolocity = currentVerticalVolocity + gravity * Time.deltaTime;   
 
             if(isGrounded())
             {
                 isJumping = false;
-                jumpTime = 0.0f;
+                currentVerticalVolocity = initialVolocity;
             }
         }
+        Debug.Log(isGrounded().ToString());
 
     }
 }
