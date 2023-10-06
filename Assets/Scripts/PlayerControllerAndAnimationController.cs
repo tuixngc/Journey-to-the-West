@@ -11,23 +11,35 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
     PlayerInput playerInput;
     CharacterController characterController;
     float RotationPerFrame = 15.0f;
-    float RunMultiplier = 3.0f;
+    float RunMultiplier = 5.0f;
+    float WalkMultiplier = 1.5f;
+    float Friction = -6.0f;
     
     bool isWalking;
     bool isRunning;
+    bool isJumping;
 
     int isWalkingHash;
     int isRunningHash;
+    int isJumpingHash;
 
     bool isWalkingPressed;
     bool isRunningPressed;
-    bool isJumpPressed;
+    bool isJumpingPressed;
 
     Vector2 currentMovementInput;
-    Vector3 currentMovement;
+    Vector3 currentWalkVelocity;
+    Vector3 currentRunVelocity;
+
+    //jump viariables
+    float timeToApex = 0.5f;
+    float maxHeightOfJumping = 1.0f;
+    float gravity;
+    float initialVelocity;
 
     void Awake()
     {
+        QualitySettings.vSyncCount = 1;
         playerInput = new PlayerInput();
         animator = GetComponent<Animator>();
         characterController = GetComponent<CharacterController>();
@@ -42,20 +54,24 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         playerInput.CharacterControls.Run.canceled += OnRunInput;
         playerInput.CharacterControls.Jump.started += OnJumpInput;
         playerInput.CharacterControls.Jump.canceled += OnJumpInput;
+
+        setupJumpVariables();
     }
 
     void OnJumpInput(InputAction.CallbackContext context)
     {
-        
+        isJumpingPressed = context.ReadValueAsButton();
     }
     
     void OnMovementInput(InputAction.CallbackContext context)
     {
         currentMovementInput = context.ReadValue<Vector2>();
-
-        currentMovement.x = currentMovementInput.x;
-        currentMovement.z = currentMovementInput.y;
         isWalkingPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
+
+        currentWalkVelocity.x = currentMovementInput.x * WalkMultiplier;
+        currentWalkVelocity.z = currentMovementInput.y * WalkMultiplier;
+        currentRunVelocity.x = currentMovementInput.x * RunMultiplier;
+        currentRunVelocity.z = currentMovementInput.y * RunMultiplier;
     }
 
     void OnRunInput(InputAction.CallbackContext context)
@@ -91,22 +107,24 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
 
     void handleMovement()
     {
-        characterController.Move(currentMovement * Time.deltaTime);
-        if(isRunning)
+        if(isRunningPressed)
         {
-            characterController.Move(currentMovement * Time.deltaTime * RunMultiplier);
+            characterController.Move(currentRunVelocity * Time.deltaTime);
         }
-
-        handleGravity();
+        else
+        {
+            characterController.Move(currentWalkVelocity * Time.deltaTime);
+        }
+        
     }
 
     void handleRotation()
     {
         Vector3 positionToLookAt;
 
-        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.x = currentWalkVelocity.x;
         positionToLookAt.y = 0.0f;
-        positionToLookAt.z = currentMovement.z;
+        positionToLookAt.z = currentWalkVelocity.z;
         
         Quaternion currentRotation = transform.rotation;
         
@@ -117,27 +135,64 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         }
 
     }
+     
+    void setupJumpVariables()
+    {
+        gravity = (-2 * maxHeightOfJumping) / Mathf.Pow(timeToApex, 2.0f);
+        initialVelocity = (2 * maxHeightOfJumping) / timeToApex;
+    }
+
+    void handleJump()
+    {
+        if(!isJumping && isJumpingPressed && characterController.isGrounded)
+        {
+            isJumping = true;
+            currentWalkVelocity.y = initialVelocity;
+            currentRunVelocity.y = initialVelocity;
+        }
+        if(isJumping && !isJumpingPressed && characterController.isGrounded)
+        {
+            isJumping = false;
+        }
+    }
 
     void handleGravity()
     {
         if(characterController.isGrounded)
         {
             float groundedGravity = -0.05f;
-            currentMovement.y = groundedGravity;
+            currentWalkVelocity.y = groundedGravity;
+            currentRunVelocity.y = groundedGravity;
         }
         else
         {
-            float ungroundedGravity = -9.8f;
-            currentMovement.y += ungroundedGravity;
+            currentWalkVelocity.y += gravity * Time.deltaTime;
+            currentRunVelocity.y += gravity * Time.deltaTime;
+        }
+    }
+
+    void handleDrag()
+    {
+        if(!isWalkingPressed && characterController.isGrounded)
+        {
+            currentWalkVelocity.x += currentWalkVelocity.x * Friction * Time.deltaTime;
+            currentWalkVelocity.z += currentWalkVelocity.z * Friction * Time.deltaTime;
+            currentRunVelocity.x += currentRunVelocity.x * Friction * Time.deltaTime;
+            currentRunVelocity.z += currentRunVelocity.x * Friction * Time.deltaTime;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+        handleJump();
         handleAnimation();
         handleMovement();
         handleRotation();
+        handleGravity();
+        handleDrag();
+        //handleJump();
+        
     }
 
     private void OnEnable() 

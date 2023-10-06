@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class JumpTest : MonoBehaviour
 {
-    [SerializeField] float initialVolocity = 0.0f;
-    float currentVerticalVolocity;
+    [SerializeField] float initialVelocity = 0.0f;
+    float currentVerticalVelocity;
     [SerializeField] float gravity = -9.8f;
     Vector3 currentPosition;
     bool isJumping = false;
@@ -23,7 +23,7 @@ public class JumpTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        currentVerticalVolocity = initialVolocity;
+        currentVerticalVelocity = initialVelocity;
     }
     
     bool isGrounded()
@@ -43,15 +43,15 @@ public class JumpTest : MonoBehaviour
         //Debug.Log("isJumping : " + isJumping.ToString());
         if(isJumping)
         {
-            //transform.position.Set(currentPosition.x,(currentPosition.y + currentVerticalVolocity * jumpTime),currentPosition.z);
-            newPos = new Vector3(currentPosition.x,(currentPosition.y + currentVerticalVolocity * Time.deltaTime),currentPosition.z);
+            //transform.position.Set(currentPosition.x,(currentPosition.y + currentVerticalVelocity * jumpTime),currentPosition.z);
+            newPos = new Vector3(currentPosition.x,(currentPosition.y + currentVerticalVelocity * Time.deltaTime),currentPosition.z);
             transform.position = newPos;
-            currentVerticalVolocity = currentVerticalVolocity + gravity * Time.deltaTime;   
+            currentVerticalVelocity = currentVerticalVelocity + gravity * Time.deltaTime;   
 
             if(isGrounded())
             {
                 isJumping = false;
-                currentVerticalVolocity = initialVolocity;
+                currentVerticalVelocity = initialVelocity;
             }
         }
         Debug.Log(isGrounded().ToString());
