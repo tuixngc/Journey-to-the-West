@@ -36,6 +36,10 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
     float maxHeightOfJumping = 1.0f;
     float gravity;
     float initialVelocity;
+    //To update the vertical velocity
+    float currentJumpVelocity;
+    float newJumpVelocity;
+    float nextJumpVelocity;
 
     void Awake()
     {
@@ -46,6 +50,7 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
 
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
+        isJumpingHash = Animator.StringToHash("isJumping");
 
         playerInput.CharacterControls.Movement.performed += OnMovementInput;
         playerInput.CharacterControls.Movement.started += OnMovementInput;
@@ -67,22 +72,36 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
     {
         currentMovementInput = context.ReadValue<Vector2>();
         isWalkingPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
-
-        currentWalkVelocity.x = currentMovementInput.x * WalkMultiplier;
-        currentWalkVelocity.z = currentMovementInput.y * WalkMultiplier;
-        currentRunVelocity.x = currentMovementInput.x * RunMultiplier;
-        currentRunVelocity.z = currentMovementInput.y * RunMultiplier;
+        
+        if(!isJumping && characterController.isGrounded)
+        {
+            currentWalkVelocity.x = currentMovementInput.x * WalkMultiplier;
+            currentWalkVelocity.z = currentMovementInput.y * WalkMultiplier;
+            currentRunVelocity.x = currentMovementInput.x * RunMultiplier;
+            currentRunVelocity.z = currentMovementInput.y * RunMultiplier;
+        }
+        
     }
 
     void OnRunInput(InputAction.CallbackContext context)
     {
-        isRunningPressed = context.ReadValueAsButton();
+        bool isRunningInput = context.ReadValueAsButton();
+        
+        if(!isJumping && characterController.isGrounded)
+        {
+            isRunningPressed = isRunningInput;
+        }
+        else
+        {
+            isRunningPressed = false;
+        }
     }
 
     void handleAnimation()
     {
         isWalking = animator.GetBool(isWalkingHash);
         isRunning = animator.GetBool(isRunningHash);
+        isJumping = animator.GetBool(isJumpingHash);
 
         if(isWalkingPressed && !isWalking)
         {
@@ -103,6 +122,8 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         {
             animator.SetBool(isRunningHash,false);
         }
+
+
     }
 
     void handleMovement()
@@ -147,8 +168,8 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         if(!isJumping && isJumpingPressed && characterController.isGrounded)
         {
             isJumping = true;
-            currentWalkVelocity.y = initialVelocity;
-            currentRunVelocity.y = initialVelocity;
+            currentWalkVelocity.y = initialVelocity * 0.5f;
+            currentRunVelocity.y = initialVelocity * 0.5f;
         }
         if(isJumping && !isJumpingPressed && characterController.isGrounded)
         {
@@ -166,12 +187,15 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         }
         else
         {
-            currentWalkVelocity.y += gravity * Time.deltaTime;
-            currentRunVelocity.y += gravity * Time.deltaTime;
+            currentJumpVelocity = currentWalkVelocity.y;
+            newJumpVelocity = currentJumpVelocity + gravity * Time.deltaTime;
+            nextJumpVelocity = (currentJumpVelocity + newJumpVelocity) * 0.5f;
+            currentWalkVelocity.y = nextJumpVelocity;
+            currentRunVelocity.y = nextJumpVelocity;
         }
     }
 
-    void handleDrag()
+    void handleFriction()
     {
         if(!isWalkingPressed && characterController.isGrounded)
         {
@@ -190,7 +214,7 @@ public class PlayerControllerAndAnimationController : MonoBehaviour
         handleMovement();
         handleRotation();
         handleGravity();
-        handleDrag();
+        handleFriction();
         //handleJump();
         
     }
