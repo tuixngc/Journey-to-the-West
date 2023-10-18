@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0f53a780e4814fd4b4a4e5913389f1d, type: 3}
+  m_Name: ExampleRenderPipelineAsset
+  m_EditorClassIdentifier: 
+  exampleColor: {r: 0, g: 0, b: 0, a: 0}
+  exampleString: Hello!
